@@ -13,7 +13,7 @@ Jenkins是一个开源软件项目，是基于Java开发的一种持续集成工
 ## 安装 java 环境
 
 1.rpm 包下载地址<br/>
-https://www.java.com/zh_CN/download/win10.jsp
+https://www.oracle.com/java/technologies/jdk8-downloads.html
   
 2.安装命令<br/>
 rpm -ivh 包
@@ -25,7 +25,7 @@ java -version
 ## 安装 Jenkins 
 
 1.下载 Java 的 war 包<br/>
-https://www.oracle.com/java/technologies/jdk8-downloads.html
+http://mirrors.jenkins.io/war-stable/latest/jenkins.war
 
 2.启动 Jenkins<br/>
 
@@ -69,7 +69,94 @@ java -jar jenkins.war
 
 <img src="./img/1.png">
 
-2.安装Generic Webhook Trigger Plugin插件（系统管理-插件管理-搜索Generic Webhook Trigger Plugin）如果可选插件列表为空，点击高级标签页，替换升级站点的URL为：http://mirror.xmission.com/jenkins/updates/update-center.json并且点击提交和立即获取。
+1-1.上面一步是基于 HTTP clone 代码，现在再说一下基于 SSH clone 代码<br/>
+  1.在 jenkins 的服务器上生成密钥
+  
+  ```
+  [root@localhost ~]# 
+  [root@localhost ~]# ssh-keygen -t rsa
+  Generating public/private rsa key pair.
+  Enter file in which to save the key (/root/.ssh/id_rsa): 
+  Enter passphrase (empty for no passphrase): 
+  Enter same passphrase again: 
+  Your identification has been saved in /root/.ssh/id_rsa.
+  Your public key has been saved in /root/.ssh/id_rsa.pub.
+  The key fingerprint is:
+  SHA256:+N6gWcIIyb3E+76SVSsGbQ9kMKcQuKaGU1PhSPFiVAw root@localhost.localdomain
+  The key's randomart image is:
+  +---[RSA 2048]----+
+  | .E*=o.          |
+  |.o =o+o          |
+  | .+.++           |
+  |.+o=. +..        |
+  |+.+.+o.+S.       |
+  |+. o =+.o        |
+  |..  ++o.+        |
+  |    o. * o       |
+  |     o*.. .      |
+  +----[SHA256]-----+
+  [root@localhost ~]# 
+  ```
+  
+  2.查看已经生成的公钥
+  
+  ```
+  [root@localhost ~]# cd ~/.ssh
+  [root@localhost .ssh]# ls
+  id_rsa  id_rsa.pub  known_hosts
+  [root@localhost .ssh]# cat id_rsa.pub 
+  ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDBdDhTl2rgoOAQ+86yOpBTI37BPgL/DI6R2oHogZ1ll+njsv4Pq4q3hoqupN7xEXeRyz1RFb9Ckqf4s2d0FEUMWMvAtCyfcidZOzH83tzQhXmqdnTfGwIZ3/ql82RB+VgQSmH+FkXXb+oOI5wtzK382LDTMXEgv1X3X/UYc4YpjlS9Fqcymg48f14QD2Hneo8dSDKfUdKRNG+VeC870vKm5LmBLI1GEbXcTSY2pFoT901RouUx3BahOs9PHsQ9jjCfVFQWLFF4wRyqNxzLVN0u+bezWOZfdnowFTNaqHOlQUPdTa+13ni8eNmCHgKtGs3+XUNnn8uomneK0Ysi2VPh root@localhost.localdomain
+  [root@localhost .ssh]# 
+  ```
+  
+  3.将公钥加入对应的仓库中
+  
+  <img src="./img/1-1.png" />
+  
+  4.查看已生成的私钥
+  
+  ```
+  [root@localhost .ssh]# cat id_rsa
+  -----BEGIN RSA PRIVATE KEY-----
+  MIIEowIBAAKCAQEAwXQ4U5dq4KDgEPvOsjqQUyN+wT4C/wyOkdqB6IGdZZfp47L+
+  D6uKt4aKrqTe8RF3kcs9URW/QpKn+LNndBRFDFjLwLQsn3InWTsx/N7c0IV5qnZ0
+  3xsCGd/6pfNkQflYEEph/hZF12/qDiOcLcyt/Niw0zFxIL9V91/1GHOGKY5UvRan
+  MpoOPH9eEA9h53qPHUgyn1HSkTRvlXgvO9LypuS5gSyNRhG13E0mNqRaE/dNUaLl
+  MdwWoTrPTx7EPY4wn1RUFixReMEcqjccy1TdLvm3s1jmX3Z6MBUzWqhzpUFD3U2v
+  td54vHjZgh4CrRrN/l1DZ5/LqJp3itGLItlT4QIDAQABAoIBAFdcwMMfMijW/dkt
+  nh5mzB5/fRKPipLbfNbpMplpT0c932Xww0MYWMCghahw1C1RkgnJGpuvknvh9vEd
+  M678KGJ3ByyzMSOgTZzCWsSzcEzKujL847KNY9mDiJHA5JnWnKperPot3MR5yd0w
+  v6r/L+NriA8X2NrNDWl1cB3mrcO9tg5u+B5igVxLkSBLgqzJ7fzqphoDvFTBld8a
+  +GflRWmOByN540DUhmIU+UfSy9kBPghvZ7rfDgQEjTuCO13NWYPTqTofXukV0UtY
+  I0Z6snayvJBh3lG2UfzUfMs5JI/v3UsPR5dftOLGHCkoRJskTr1hAquAjK8WGg3B
+  5xRxwnECgYEA3+FS5crZPf3yxfwY4kTVOWmlgwlBVb9z4K8KM5xgeU8IxLeI32Kx
+  /ls7QNyIFh5o+nqnoJxU8Ce4E5jNngAI81ClradIyQVQ5+60z95Q5CHhP5B/hDMt
+  dxfnwpyMxm+n/NJXO3UhgDKQjh8dREzf4kiNrmHSHLYM73FHzRGbN7cCgYEA3TVn
+  Cr54iawVHEhxyOEge/GhwpwsLmnDya2lGpB8W6rMakYVhZdTnSbOVDxauFF6Doa7
+  vgIB1OXIwFkTm2SlY1s7SXvtdD2zB/xNEGx2ULaw2dFHEwxPWKpxGj83QQrvJGsT
+  FFIc8m2ClPN8WgIuct/9Umol6PBiNBgM+GGk4ScCgYANYX0/6MDVOLFi7e9azrxj
+  wxG2ZD44bsnxOuUEMqt9dKDUiRewKkjzJ+bBuKyVjdm+ZshQDCfzdpxE55QahmwC
+  huZwG5h5E01Dn3vFFMeG6xN4Zh2I/DoSbSZX9l1fmtrSfIvkLNsEu4DyTZ/FLkcP
+  UkDNlGEngCYDxaSB+DRrvwKBgQCjPaRz1kmHdzkA7Skiz5e0P4Va4vrrqVs1enIr
+  n1JWJz3Ac0WwlxK6FwgOO5fLCz1ieOUU+9A0Nvolj9abRvOR1aJzwQNjU6DJlNOd
+  +hx5xcfOhdTIZr4rNWRPtTTmR9Zgbq/ewBXihRPnLaOnnJKAbXE4n2KoerRNsy3n
+  Ic+V4wKBgFBDiH27x0gW8O75gqyvPY/B73r1I7laBLkL9/vLJKgAW2dk6F60RNYL
+  OtvIeVn130O1HJ3O5YCyrSqHymwoqc3Fqy++xst9ZwaGKNBgflITWG5bn0t/+Abm
+  Qq1Lh1g6WrIjk3XzWCbSuoRSD9elbU8HWCKRpU200G79Q845joJk
+  -----END RSA PRIVATE KEY-----
+  [root@localhost .ssh]# 
+  ```
+  
+  6.配置Jenkins的认证
+  进入Jenkins>凭据>全局凭据>添加凭据，类型选择SSH Username with private key，Private Key中输入第5步中查看的私钥。
+  
+  <img src="./img/1-2.png" />
+  
+  7.配置工程中Git - Repositories
+  
+  <img src="./img/1-3.png" />
+
+2.安装Generic Webhook Trigger Plugin插件（系统管理-插件管理-搜索Generic Webhook Trigger Plugin）如果可选插件列表为空，点击高级标签页，替换升级站点的URL为：http://mirror.xmission.com/jenkins/updates/update-center.json 并且点击提交和立即获取。
 
 3.添加触发器<br/>
 第2步安装的触发器插件功能很强大，可以根据不同的触发参数触发不同的构建操作，此次是根据不同分支提交部署到不同服务器。在任务配置里勾选Generic Webhook Trigger，添加请求变量
@@ -77,6 +164,91 @@ java -jar jenkins.war
 <img src="./img/2.png">
 
 <img src="./img/2-1.png">
+
+3.1 添加多个请求参数的触发器<br/>
+因为涉及到多个项目的提交，如果是同一个 gitlab 站点发出的请求，那么如果分支名称是一样的话都会触发任务，所以下面记录一下多个参数判断。<br/>
+参考网站：https://blog.csdn.net/xlgen157387/article/details/76216351
+
+注：Variable 是过滤的参数，Expression 里面的 $ 就是请求体，可以像取对象的值取里面的请求参数
+<img src="./img/2-2.png">
+
+注：Text里面的参数就是上面的过滤参数前面加 $，下面多个参数之间用 空格 或者 逗号 或者 - 或者 _ 隔开
+<img src="./img/2-3.png">
+
+
+
+这里面的参数都是可以自定义的，想用哪个用哪个，gitlab 的请求体参数如下，我们可根据喜好来进行选择判断。
+
+```
+{
+  "object_kind": "push",
+  "event_name": "push",
+  "before": "c39640d756f5b6d2e23978dea8c9b1ebacf6c616",
+  "after": "e224ba380f7371c55535dd4fb300e28a8d4488ea",
+  "ref": "refs/heads/dev",
+  "checkout_sha": "e224ba380f7371c55535dd4fb300e28a8d4488ea",
+  "message": null,
+  "user_id": 2,
+  "user_name": "gengziyi",
+  "user_username": "gengziyi",
+  "user_email": "",
+  "user_avatar": "http://192.168.2.86:9527/uploads/-/system/user/avatar/2/avatar.png",
+  "project_id": 1,
+  "project": {
+    "id": 1,
+    "name": "yun",
+    "description": "云岫",
+    "web_url": "http://192.168.2.86:9527/root/yun",
+    "avatar_url": null,
+    "git_ssh_url": "git@192.168.2.86:root/yun.git",
+    "git_http_url": "http://192.168.2.86:9527/root/yun.git",
+    "namespace": "Administrator",
+    "visibility_level": 0,
+    "path_with_namespace": "root/yun",
+    "default_branch": "master",
+    "ci_config_path": null,
+    "homepage": "http://192.168.2.86:9527/root/yun",
+    "url": "git@192.168.2.86:root/yun.git",
+    "ssh_url": "git@192.168.2.86:root/yun.git",
+    "http_url": "http://192.168.2.86:9527/root/yun.git"
+  },
+  "commits": [
+    {
+      "id": "e224ba380f7371c55535dd4fb300e28a8d4488ea",
+      "message": "rigui\n",
+      "timestamp": "2019-09-16T01:19:37Z",
+      "url": "http://192.168.2.86:9527/root/yun/commit/e224ba380f7371c55535dd4fb300e28a8d4488ea",
+      "author": {
+        "name": "lj7788",
+        "email": "lj7788@126.com"
+      },
+      "added": [
+
+      ],
+      "modified": [
+        "vue.config.js"
+      ],
+      "removed": [
+
+      ]
+    }
+  ],
+  "total_commits_count": 1,
+  "push_options": {
+  },
+  "repository": {
+    "name": "yun",
+    "url": "git@192.168.2.86:root/yun.git",
+    "description": "云岫",
+    "homepage": "http://192.168.2.86:9527/root/yun",
+    "git_http_url": "http://192.168.2.86:9527/root/yun.git",
+    "git_ssh_url": "git@192.168.2.86:root/yun.git",
+    "visibility_level": 0
+  }
+}
+```
+
+
 
 4.配置 git hook
 
